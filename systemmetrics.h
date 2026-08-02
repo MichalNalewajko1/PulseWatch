@@ -16,6 +16,14 @@ class SystemMetrics
 public:
     MemoryInfo getMemoryInfo() const;
     std::string getComputerName() const;
+    double getCpuUsage();
+
+private:
+    std::uint64_t previousIdleTime = 0;
+    std::uint64_t previousKernelTime = 0;
+    std::uint64_t previousUserTime = 0;
+
+    bool hasPreviousCpuSample = false;
 };
 
 #endif // SYSTEMMETRICS_H

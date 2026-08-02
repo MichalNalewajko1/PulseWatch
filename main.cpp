@@ -1,6 +1,8 @@
 #include <iostream>
 #include <cstdint>
 #include <iomanip>
+#include <chrono>
+#include <thread>
 
 #include "systemmetrics.h"
 
@@ -10,6 +12,8 @@ using std::fixed;
 using std::setprecision;
 using std::uint64_t;
 using std::string;
+using std::chrono::seconds;
+using std::this_thread::sleep_for;
 
 double bytesToGibibytes(uint64_t bytes)
 {
@@ -29,25 +33,41 @@ int main()
         cerr << "Nie udalo sie pobrac nazwy komputera.\n";
         return 1;
     }
-
-    const MemoryInfo memoryInfo = systemMetrics.getMemoryInfo();
-
-    if (memoryInfo.totalBytes == 0)
-    {
-        cerr << "Nie udalo sie pobrac informacji o pamieci.\n";
-        return 1;
-    }
     cout << fixed << setprecision(2);
 
     cout << "Nazwa komputera: " << computerName << "\n\n";
 
-    cout << "Calkowity RAM:  "<< bytesToGibibytes(memoryInfo.totalBytes)<< " GiB\n";
+    // Pierwsza próbka CPU zapisuje wartości początkowe.
+    systemMetrics.getCpuUsage();
 
-    cout << "Dostepny RAM:   "<< bytesToGibibytes(memoryInfo.availableBytes)<< " GiB\n";
+    while (true)
+    {
+        sleep_for(seconds(1));
 
-    cout << "Uzywany RAM:    "<< bytesToGibibytes(memoryInfo.usedBytes)<< " GiB\n";
+        const double cpuUsage = systemMetrics.getCpuUsage();
+        const MemoryInfo memoryInfo = systemMetrics.getMemoryInfo();
 
-    cout << "Wykorzystanie:  "<< memoryInfo.usagePercent<< "%\n";
+        if (memoryInfo.totalBytes == 0)
+        {
+            cerr << "Nie udalo sie pobrac informacji o pamieci.\n";
+            return 1;
+        }
 
-    return 0;
+        cout << "Wykorzystanie CPU: " << cpuUsage << "%\n";
+
+        cout << "Calkowity RAM: "
+             << bytesToGibibytes(memoryInfo.totalBytes) << " GiB\n";
+
+        cout << "Dostepny RAM: "
+             << bytesToGibibytes(memoryInfo.availableBytes) << " GiB\n";
+
+        cout << "Uzywany RAM: "
+             << bytesToGibibytes(memoryInfo.usedBytes) << " GiB\n";
+
+        cout << "Wykorzystanie RAM: "
+             << memoryInfo.usagePercent << "%\n";
+
+        cout << "------------------------------\n";
+        cout.flush();
+    }
 }
