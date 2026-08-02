@@ -27,3 +27,19 @@ MemoryInfo SystemMetrics::getMemoryInfo() const
 
     return info;
 }
+
+std::string SystemMetrics::getComputerName() const
+{
+    char buffer[MAX_COMPUTERNAME_LENGTH + 1]{};
+
+    DWORD size = MAX_COMPUTERNAME_LENGTH + 1;
+
+    BOOL success = GetComputerNameA(buffer, &size);
+
+    if (!success)
+    {
+        return {};
+    }
+
+    return std::string(buffer, size);
+}
