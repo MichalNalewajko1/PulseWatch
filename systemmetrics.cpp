@@ -42,6 +42,39 @@ MemoryInfo SystemMetrics::getMemoryInfo() const
 
     return info;
 }
+DiskInfo SystemMetrics::getDiskInfo(
+    const std::string& drivePath) const
+{
+    ULARGE_INTEGER freeBytesAvailable{};
+    ULARGE_INTEGER totalBytes{};
+
+    BOOL success = GetDiskFreeSpaceExA(
+        drivePath.c_str(),
+        &freeBytesAvailable,
+        &totalBytes,
+        nullptr
+        );
+
+    if (!success)
+    {
+        return {};
+    }
+
+    DiskInfo info{};
+
+    info.totalBytes = totalBytes.QuadPart;
+    info.freeBytes = freeBytesAvailable.QuadPart;
+    info.usedBytes = info.totalBytes - info.freeBytes;
+
+    if (info.totalBytes > 0)
+    {
+        info.usagePercent =
+            (static_cast<double>(info.usedBytes) /
+             static_cast<double>(info.totalBytes)) * 100.0;
+    }
+
+    return info;
+}
 
 std::string SystemMetrics::getComputerName() const
 {

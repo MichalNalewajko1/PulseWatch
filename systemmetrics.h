@@ -3,6 +3,13 @@
 
 #include <cstdint>
 #include <string>
+struct DiskInfo
+{
+    std::uint64_t totalBytes = 0;
+    std::uint64_t freeBytes = 0;
+    std::uint64_t usedBytes = 0;
+    double usagePercent = 0.0;
+};
 
 struct MemoryInfo{
     uint64_t totalBytes = 0;
@@ -15,6 +22,7 @@ class SystemMetrics
 {
 public:
     MemoryInfo getMemoryInfo() const;
+    DiskInfo getDiskInfo(const std::string& drivePath) const;
     std::string getComputerName() const;
     double getCpuUsage();
 
