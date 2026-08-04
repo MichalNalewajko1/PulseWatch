@@ -157,3 +157,16 @@ double SystemMetrics::getCpuUsage()
         (static_cast<double>(busyDifference) /
          static_cast<double>(totalDifference)) * 100.0;
 }
+
+SystemSnapshot SystemMetrics::collectSnapshot(
+    const std::string& drivePath)
+{
+    SystemSnapshot snapshot{};
+
+    snapshot.computerName = getComputerName();
+    snapshot.cpuUsage = getCpuUsage();
+    snapshot.memory = getMemoryInfo();
+    snapshot.disk = getDiskInfo(drivePath);
+
+    return snapshot;
+}

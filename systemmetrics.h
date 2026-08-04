@@ -18,6 +18,14 @@ struct MemoryInfo{
     double usagePercent = 0.0;
 };
 
+struct SystemSnapshot
+{
+    std::string computerName;
+    double cpuUsage = 0.0;
+    MemoryInfo memory;
+    DiskInfo disk;
+};
+
 class SystemMetrics
 {
 public:
@@ -25,6 +33,7 @@ public:
     DiskInfo getDiskInfo(const std::string& drivePath) const;
     std::string getComputerName() const;
     double getCpuUsage();
+    SystemSnapshot collectSnapshot(const std::string& drivePath);
 
 private:
     std::uint64_t previousIdleTime = 0;
