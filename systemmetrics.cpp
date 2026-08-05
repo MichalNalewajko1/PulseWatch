@@ -1,5 +1,9 @@
 #include "systemmetrics.h"
 #include <windows.h>
+#include <chrono>
+#include <ctime>
+#include <iomanip>
+#include <sstream>
 
 namespace
 {
@@ -12,6 +16,30 @@ std::uint64_t fileTimeToUint64(const FILETIME& fileTime)
     value.HighPart = fileTime.dwHighDateTime;
 
     return value.QuadPart;
+}
+
+std::string getCurrentTimestamp()
+{
+    const auto now = std::chrono::system_clock::now();
+
+    const std::time_t currentTime =
+        std::chrono::system_clock::to_time_t(now);
+
+    std::tm localTime{};
+
+    if (localtime_s(&localTime, &currentTime) != 0)
+    {
+        return {};
+    }
+
+    std::ostringstream stream;
+
+    stream << std::put_time(
+        &localTime,
+        "%Y-%m-%d %H:%M:%S"
+        );
+
+    return stream.str();
 }
 
 }
@@ -163,6 +191,7 @@ SystemSnapshot SystemMetrics::collectSnapshot(
 {
     SystemSnapshot snapshot{};
 
+    snapshot.timestamp = getCurrentTimestamp();
     snapshot.computerName = getComputerName();
     snapshot.cpuUsage = getCpuUsage();
     snapshot.memory = getMemoryInfo();

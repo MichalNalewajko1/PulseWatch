@@ -20,6 +20,7 @@ struct MemoryInfo{
 
 struct SystemSnapshot
 {
+    std::string timestamp;
     std::string computerName;
     double cpuUsage = 0.0;
     MemoryInfo memory;
