@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_executable(PulseWatch_or main.cpp
-    systemmetrics.h systemmetrics.cpp)
+    systemmetrics.h systemmetrics.cpp
+    csvlogger.h csvlogger.cpp)
 
 

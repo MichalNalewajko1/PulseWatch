@@ -5,6 +5,7 @@
 #include <thread>
 
 #include "systemmetrics.h"
+#include "csvlogger.h"
 
 using std::cerr;
 using std::cout;
@@ -26,6 +27,8 @@ double bytesToGibibytes(uint64_t bytes)
 int main()
 {
     SystemMetrics systemMetrics;
+    CsvLogger csvLogger("pulsewatch_metrics.csv");
+
     const string diskPath = "C:\\";
 
     cout << fixed << setprecision(2);
@@ -57,6 +60,20 @@ int main()
             cerr << "Nie udalo sie pobrac informacji o dysku.\n";
             return 1;
         }
+
+        if (snapshot.timestamp.empty())
+        {
+            cerr << "Nie udalo sie pobrac aktualnego czasu.\n";
+            return 1;
+        }
+        if (!csvLogger.append(snapshot))
+        {
+            cerr << "Nie udalo sie zapisac pomiaru do pliku CSV.\n";
+            return 1;
+        }
+
+        cout << "Czas pomiaru: "
+             << snapshot.timestamp << "\n";
 
         cout << "Nazwa komputera: "
              << snapshot.computerName << "\n";
