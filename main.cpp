@@ -6,7 +6,7 @@
 
 #include "systemmetrics.h"
 #include "csvlogger.h"
-
+#include "jsonserializer.h"
 using std::cerr;
 using std::cout;
 using std::fixed;
@@ -28,7 +28,7 @@ int main()
 {
     SystemMetrics systemMetrics;
     CsvLogger csvLogger("pulsewatch_metrics.csv");
-
+    JsonSerializer jsonSerializer;
     const string diskPath = "C:\\";
 
     cout << fixed << setprecision(2);
@@ -72,6 +72,9 @@ int main()
             return 1;
         }
 
+        const string jsonPayload =
+            jsonSerializer.serialize(snapshot);
+
         cout << "Czas pomiaru: "
              << snapshot.timestamp << "\n";
 
@@ -106,6 +109,8 @@ int main()
 
         cout << "Wykorzystanie dysku: "
              << snapshot.disk.usagePercent << "%\n";
+
+        cout << "JSON: " << jsonPayload << "\n";
 
         cout << "------------------------------\n";
         cout.flush();
