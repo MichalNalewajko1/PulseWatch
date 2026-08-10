@@ -20,11 +20,13 @@ FetchContent_MakeAvailable(nlohmann_json)
 add_executable(PulseWatch_or main.cpp
     systemmetrics.h systemmetrics.cpp
     csvlogger.h csvlogger.cpp
-    jsonserializer.h jsonserializer.cpp)
+    jsonserializer.h jsonserializer.cpp
+    apiclient.h apiclient.cpp)
 
 target_link_libraries(
     PulseWatch_or
     PRIVATE
     nlohmann_json::nlohmann_json
+    winhttp
 )
 
