@@ -1,9 +1,20 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from database import initialize_database
 
-app = FastAPI(title="PulseWatch API")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    initialize_database()
+    yield
 
+
+app = FastAPI(
+    title="PulseWatch API",
+    lifespan=lifespan
+)
 
 class MemoryMetrics(BaseModel):
     total_bytes: int

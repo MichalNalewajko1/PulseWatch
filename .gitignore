@@ -87,3 +87,4 @@ CMakeLists.txt.user*
 /.qtcreator/
 __pycache__/
 *.pyc
+/backend/pulsewatch.db*
