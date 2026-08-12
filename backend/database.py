@@ -34,3 +34,52 @@ def initialize_database() -> None:
         connection.commit()
     finally:
         connection.close()
+
+def save_snapshot(snapshot: dict) -> int:
+    connection = sqlite3.connect(DATABASE_PATH)
+
+    try:
+        cursor = connection.execute(
+            """
+            INSERT INTO snapshots (
+                timestamp,
+                computer_name,
+                cpu_usage_percent,
+                memory_total_bytes,
+                memory_available_bytes,
+                memory_used_bytes,
+                memory_usage_percent,
+                disk_total_bytes,
+                disk_free_bytes,
+                disk_used_bytes,
+                disk_usage_percent
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                snapshot["timestamp"],
+                snapshot["computer_name"],
+                snapshot["cpu_usage_percent"],
+                snapshot["memory"]["total_bytes"],
+                snapshot["memory"]["available_bytes"],
+                snapshot["memory"]["used_bytes"],
+                snapshot["memory"]["usage_percent"],
+                snapshot["disk"]["total_bytes"],
+                snapshot["disk"]["free_bytes"],
+                snapshot["disk"]["used_bytes"],
+                snapshot["disk"]["usage_percent"]
+            )
+        )
+
+        connection.commit()
+
+        snapshot_id = cursor.lastrowid
+
+        if snapshot_id is None:
+            raise RuntimeError(
+                "Nie udalo sie pobrac ID zapisanego pomiaru."
+            )
+
+        return snapshot_id
+    finally:
+        connection.close()

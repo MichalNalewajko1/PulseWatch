@@ -1,9 +1,10 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from pydantic import BaseModel
 
-from database import initialize_database
+from database import initialize_database, save_snapshot
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,12 +44,18 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/api/v1/snapshots")
+@app.post(
+    "/api/v1/snapshots",
+    status_code=status.HTTP_201_CREATED
+)
 def receive_snapshot(snapshot: SystemSnapshotPayload):
-    print(snapshot.model_dump())
+    snapshot_id = save_snapshot(
+        snapshot.model_dump()
+    )
 
     return {
         "status": "accepted",
+        "id": snapshot_id,
         "computer_name": snapshot.computer_name,
         "timestamp": snapshot.timestamp
     }
