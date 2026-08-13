@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>PulseWatch Dashboard</title>
+    <link rel="stylesheet" href="/dashboard/styles.css"> 
+
+</head>
+
+<body>
+    <header class="page-header">
+    <h1>PulseWatch</h1>
+    <p>Monitor zasobów systemowych</p>
+</header>
+
+<main class="dashboard">
+    <section class="snapshot-panel">
+        <h2>Ostatni pomiar</h2>
+
+        <p id="status">
+            Pobieranie danych...
+        </p>
+
+        <div class="device-info">
+            <p>
+                Komputer:
+                <strong id="computerName">-</strong>
+            </p>
+
+            <p>
+                Czas pomiaru:
+                <strong id="timestamp">-</strong>
+            </p>
+        </div>
+
+        <div class="metrics-grid">
+    <article class="metric-card cpu-card">
+        <h3>CPU</h3>
+        <p id="cpuUsage">-</p>
+
+        <progress
+            id="cpuProgress"
+            class="usage-progress"
+            value="0"
+            max="100"
+        ></progress>
+    </article>
+
+    <article class="metric-card ram-card">
+        <h3>RAM</h3>
+        <p id="ramUsage">-</p>
+
+        <progress
+            id="ramProgress"
+            class="usage-progress"
+            value="0"
+            max="100"
+        ></progress>
+    </article>
+
+    <article class="metric-card disk-card">
+        <h3>Dysk</h3>
+        <p id="diskUsage">-</p>
+
+        <progress
+            id="diskProgress"
+            class="usage-progress"
+            value="0"
+            max="100"
+        ></progress>
+    </article>
+</div>
+    </section>
+</main>
+
+ <script>
+    async function loadLatestSnapshot()
+    {
+        const statusElement =
+            document.getElementById("status");
+
+        const computerNameElement =
+            document.getElementById("computerName");
+
+        const timestampElement =
+            document.getElementById("timestamp");
+
+        const cpuUsageElement =
+            document.getElementById("cpuUsage");
+
+        const ramUsageElement =
+            document.getElementById("ramUsage");
+
+        const diskUsageElement =
+            document.getElementById("diskUsage");
+        
+        const cpuProgressElement =
+            document.getElementById("cpuProgress");
+
+        const ramProgressElement =
+            document.getElementById("ramProgress");
+
+        const diskProgressElement =
+            document.getElementById("diskProgress");
+
+        try
+        {
+            const response = await fetch(
+                "/api/v1/snapshots?limit=1",
+                {
+                    cache: "no-store"
+                }
+            );
+
+            if (!response.ok)
+            {
+                throw new Error(
+                    `Błąd HTTP: ${response.status}`
+                );
+            }
+
+            const snapshots = await response.json();
+
+            if (snapshots.length === 0)
+            {
+                statusElement.textContent =
+                    "Brak pomiarów w bazie.";
+
+                return;
+            }
+
+            const snapshot = snapshots[0];
+
+            statusElement.textContent =
+                "Dane pobrane poprawnie.";
+
+            computerNameElement.textContent =
+                snapshot.computer_name;
+
+            timestampElement.textContent =
+                snapshot.timestamp;
+
+            const cpuUsage =
+                Number(snapshot.cpu_usage_percent);
+
+            const ramUsage =
+                Number(snapshot.memory_usage_percent);
+
+            const diskUsage =
+                Number(snapshot.disk_usage_percent);
+
+            cpuUsageElement.textContent =
+                `${cpuUsage.toFixed(2)}%`;
+
+            ramUsageElement.textContent =
+                `${ramUsage.toFixed(2)}%`;
+
+            diskUsageElement.textContent =
+                `${diskUsage.toFixed(2)}%`;
+
+            cpuProgressElement.value = cpuUsage;
+            ramProgressElement.value = ramUsage;
+            diskProgressElement.value = diskUsage;
+        }
+        catch (error)
+        {
+            statusElement.textContent =
+                `Nie udało się pobrać danych: ${error.message}`;
+        }
+    }
+
+    loadLatestSnapshot();
+    setInterval(
+        loadLatestSnapshot,
+        3000
+    );
+</script>
+</body>
+</html>

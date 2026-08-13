@@ -1,10 +1,16 @@
-from contextlib import asynccontextmanager
+from pathlib import Path
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Query, status
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from database import get_latest_snapshots, initialize_database, save_snapshot
 
+STATIC_DIRECTORY = (
+    Path(__file__).resolve().parent
+    / "static"
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,6 +21,15 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="PulseWatch API",
     lifespan=lifespan
+)
+
+app.mount(
+    "/dashboard",
+    StaticFiles(
+        directory=STATIC_DIRECTORY,
+        html=True
+    ),
+    name="dashboard"
 )
 
 class MemoryMetrics(BaseModel):
