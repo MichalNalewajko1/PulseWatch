@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, status
+from fastapi import FastAPI, Query, status
 from pydantic import BaseModel
 
-from database import initialize_database, save_snapshot
+from database import get_latest_snapshots, initialize_database, save_snapshot
 
 
 @asynccontextmanager
@@ -42,6 +42,16 @@ class SystemSnapshotPayload(BaseModel):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+@app.get("/api/v1/snapshots")
+def read_snapshots(
+    limit: int = Query(
+        default=10,
+        ge=1,
+        le=100
+    )
+):
+    return get_latest_snapshots(limit)
 
 
 @app.post(

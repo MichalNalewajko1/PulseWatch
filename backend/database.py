@@ -83,3 +83,39 @@ def save_snapshot(snapshot: dict) -> int:
         return snapshot_id
     finally:
         connection.close()
+
+def get_latest_snapshots(limit: int) -> list[dict]:
+    connection = sqlite3.connect(DATABASE_PATH)
+    connection.row_factory = sqlite3.Row
+
+    try:
+        cursor = connection.execute(
+            """
+            SELECT
+                id,
+                timestamp,
+                computer_name,
+                cpu_usage_percent,
+                memory_total_bytes,
+                memory_available_bytes,
+                memory_used_bytes,
+                memory_usage_percent,
+                disk_total_bytes,
+                disk_free_bytes,
+                disk_used_bytes,
+                disk_usage_percent
+            FROM snapshots
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (limit,)
+        )
+
+        rows = cursor.fetchall()
+
+        return [
+            dict(row)
+            for row in rows
+        ]
+    finally:
+        connection.close()
