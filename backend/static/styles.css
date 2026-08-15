@@ -48,8 +48,21 @@ body {
     display: inline-block;
     padding: 8px 12px;
     border-radius: 6px;
+}
+
+#status.status-online {
     color: #166534;
     background-color: #dcfce7;
+}
+
+#status.status-stale {
+    color: #92400e;
+    background-color: #fef3c7;
+}
+
+#status.status-error {
+    color: #991b1b;
+    background-color: #fee2e2;
 }
 
 .device-info {

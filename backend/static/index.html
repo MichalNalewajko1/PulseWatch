@@ -1,283 +1,326 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
     <meta charset="UTF-8">
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>PulseWatch Dashboard</title>
-    <link rel="stylesheet" href="/dashboard/styles.css"> 
+    <link rel="stylesheet" href="/dashboard/styles.css">
 
 </head>
 
 <body>
     <header class="page-header">
-    <h1>PulseWatch</h1>
-    <p>Monitor zasobów systemowych</p>
-</header>
+        <h1>PulseWatch</h1>
+        <p>Monitor zasobów systemowych</p>
+    </header>
 
-<main class="dashboard">
-    <section class="snapshot-panel">
-        <h2>Ostatni pomiar</h2>
+    <main class="dashboard">
+        <section class="snapshot-panel">
+            <h2>Ostatni pomiar</h2>
 
-        <p id="status">
-            Pobieranie danych...
-        </p>
-
-        <div class="device-info">
-            <p>
-                Komputer:
-                <strong id="computerName">-</strong>
+            <p id="status">
+                Pobieranie danych...
             </p>
 
-            <p>
-                Czas pomiaru:
-                <strong id="timestamp">-</strong>
-            </p>
-        </div>
+            <div class="device-info">
+                <p>
+                    Komputer:
+                    <strong id="computerName">-</strong>
+                </p>
 
-        <div class="metrics-grid">
-    <article class="metric-card cpu-card">
-        <h3>CPU</h3>
-        <p id="cpuUsage">-</p>
+                <p>
+                    Czas pomiaru:
+                    <strong id="timestamp">-</strong>
+                </p>
+            </div>
 
-        <progress
-            id="cpuProgress"
-            class="usage-progress"
-            value="0"
-            max="100"
-        ></progress>
-    </article>
+            <div class="metrics-grid">
+                <article class="metric-card cpu-card">
+                    <h3>CPU</h3>
+                    <p id="cpuUsage">-</p>
 
-    <article class="metric-card ram-card">
-        <h3>RAM</h3>
-        <p id="ramUsage">-</p>
+                    <progress id="cpuProgress" class="usage-progress" value="0" max="100"></progress>
+                </article>
 
-        <progress
-            id="ramProgress"
-            class="usage-progress"
-            value="0"
-            max="100"
-        ></progress>
-        <p id="ramDetails" class="metric-details">-</p>
+                <article class="metric-card ram-card">
+                    <h3>RAM</h3>
+                    <p id="ramUsage">-</p>
 
-    </article>
+                    <progress id="ramProgress" class="usage-progress" value="0" max="100"></progress>
+                    <p id="ramDetails" class="metric-details">-</p>
 
-    <article class="metric-card disk-card">
-        <h3>Dysk</h3>
-        <p id="diskUsage">-</p>
+                </article>
 
-        <progress
-            id="diskProgress"
-            class="usage-progress"
-            value="0"
-            max="100"
-        ></progress>
-        <p id="diskDetails" class="metric-details">-</p>
-    </article>
-        </div>
-    </section>
+                <article class="metric-card disk-card">
+                    <h3>Dysk</h3>
+                    <p id="diskUsage">-</p>
+
+                    <progress id="diskProgress" class="usage-progress" value="0" max="100"></progress>
+                    <p id="diskDetails" class="metric-details">-</p>
+                </article>
+            </div>
+        </section>
         <section class="history-panel">
-    <h2>Historia pomiarów</h2>
+            <h2>Historia pomiarów</h2>
 
-    <div class="table-wrapper">
-        <table class="history-table">
-            <thead>
-                <tr>
-                    <th>Czas</th>
-                    <th>Komputer</th>
-                    <th>CPU</th>
-                    <th>RAM</th>
-                    <th>Dysk</th>
-                </tr>
-            </thead>
+            <div class="table-wrapper">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Czas</th>
+                            <th>Komputer</th>
+                            <th>CPU</th>
+                            <th>RAM</th>
+                            <th>Dysk</th>
+                        </tr>
+                    </thead>
 
-            <tbody id="historyBody">
-            </tbody>
-        </table>
-    </div>
-    </section> 
-</main>
+                    <tbody id="historyBody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
 
- <script>
-    function bytesToGibibytes(bytes)
-    {
-    const bytesPerGibibyte =
-        1024 * 1024 * 1024;
+    <script>
+        function bytesToGibibytes(bytes) {
+            const bytesPerGibibyte =
+                1024 * 1024 * 1024;
 
-    return Number(bytes) / bytesPerGibibyte;
-    }   
-    async function loadLatestSnapshot()
-    {
-        const historyBodyElement =
-            document.getElementById("historyBody");
-        const statusElement =
-            document.getElementById("status");
+            return Number(bytes) / bytesPerGibibyte;
+        }
+        function updateAgentStatus(
+            statusElement,
+            timestamp
+        ) {
+            const normalizedTimestamp =
+                timestamp.replace(" ", "T");
 
-        const computerNameElement =
-            document.getElementById("computerName");
+            const measurementTime =
+                new Date(normalizedTimestamp);
 
-        const timestampElement =
-            document.getElementById("timestamp");
-
-        const cpuUsageElement =
-            document.getElementById("cpuUsage");
-
-        const ramUsageElement =
-            document.getElementById("ramUsage");
-
-        const diskUsageElement =
-            document.getElementById("diskUsage");
-
-        const ramDetailsElement =
-            document.getElementById("ramDetails");
-
-        const diskDetailsElement =
-            document.getElementById("diskDetails");
-
-        const cpuProgressElement =
-            document.getElementById("cpuProgress");
-
-        const ramProgressElement =
-            document.getElementById("ramProgress");
-
-        const diskProgressElement =
-            document.getElementById("diskProgress");
-
-        try
-        {
-            const response = await fetch(
-                "/api/v1/snapshots?limit=10",
-                {
-                    cache: "no-store"
-                }
-            );
-
-            if (!response.ok)
-            {
-                throw new Error(
-                    `Błąd HTTP: ${response.status}`
-                );
-            }
-
-            const snapshots = await response.json();
-
-            if (snapshots.length === 0)
-            {
+            if (Number.isNaN(measurementTime.getTime())) {
                 statusElement.textContent =
-                    "Brak pomiarów w bazie.";
+                    "Nieprawidłowy czas pomiaru.";
+
+                statusElement.className =
+                    "status-error";
 
                 return;
             }
 
-            const snapshot = snapshots[0];
-                        historyBodyElement.replaceChildren();
+            const ageMilliseconds =
+                Date.now() - measurementTime.getTime();
 
-            for (const item of snapshots)
-            {
-                const row = document.createElement("tr");
+            const ageSeconds = Math.max(
+                0,
+                Math.floor(ageMilliseconds / 1000)
+            );
 
-                const timestampCell =
-                    document.createElement("td");
+            if (ageSeconds <= 5) {
+                statusElement.textContent =
+                    "Agent online — dane aktualne.";
 
-                const computerNameCell =
-                    document.createElement("td");
-
-                const cpuCell =
-                    document.createElement("td");
-
-                const ramCell =
-                    document.createElement("td");
-
-                const diskCell =
-                    document.createElement("td");
-
-                timestampCell.textContent =
-                    item.timestamp;
-
-                computerNameCell.textContent =
-                    item.computer_name;
-
-                cpuCell.textContent =
-                    `${Number(item.cpu_usage_percent).toFixed(2)}%`;
-
-                ramCell.textContent =
-                    `${Number(item.memory_usage_percent).toFixed(2)}%`;
-
-                diskCell.textContent =
-                    `${Number(item.disk_usage_percent).toFixed(2)}%`;
-
-                row.appendChild(timestampCell);
-                row.appendChild(computerNameCell);
-                row.appendChild(cpuCell);
-                row.appendChild(ramCell);
-                row.appendChild(diskCell);
-
-                historyBodyElement.appendChild(row);
+                statusElement.className =
+                    "status-online";
             }
+            else {
+                statusElement.textContent =
+                    `Agent nieaktywny — ostatni pomiar ${ageSeconds} s temu.`;
 
-            statusElement.textContent =
-                "Dane pobrane poprawnie.";
-
-            computerNameElement.textContent =
-                snapshot.computer_name;
-
-            timestampElement.textContent =
-                snapshot.timestamp;
-
-            const cpuUsage =
-                Number(snapshot.cpu_usage_percent);
-
-            const ramUsage =
-                Number(snapshot.memory_usage_percent);
-
-            const diskUsage =
-                Number(snapshot.disk_usage_percent);
-
-            cpuUsageElement.textContent =
-                `${cpuUsage.toFixed(2)}%`;
-
-            ramUsageElement.textContent =
-                `${ramUsage.toFixed(2)}%`;
-
-            diskUsageElement.textContent =
-                `${diskUsage.toFixed(2)}%`;
-
-            cpuProgressElement.value = cpuUsage;
-            ramProgressElement.value = ramUsage;
-            diskProgressElement.value = diskUsage;
-            const ramUsed =
-                bytesToGibibytes(snapshot.memory_used_bytes);
-
-            const ramTotal =
-                bytesToGibibytes(snapshot.memory_total_bytes);
-
-            const diskUsed =
-                bytesToGibibytes(snapshot.disk_used_bytes);
-
-            const diskTotal =
-                bytesToGibibytes(snapshot.disk_total_bytes);
-
-            ramDetailsElement.textContent =
-                `${ramUsed.toFixed(2)} z ${ramTotal.toFixed(2)} GiB`;
-
-            diskDetailsElement.textContent =
-                `${diskUsed.toFixed(2)} z ${diskTotal.toFixed(2)} GiB`;
+                statusElement.className =
+                    "status-stale";
+            }
         }
-        catch (error)
-        {
-            statusElement.textContent =
-                `Nie udało się pobrać danych: ${error.message}`;
-        }
-    }
+        let latestDisplayedId = 0;
+        async function loadLatestSnapshot() {
+            const historyBodyElement =
+                document.getElementById("historyBody");
+            const statusElement =
+                document.getElementById("status");
 
-    loadLatestSnapshot();
-    setInterval(
-        loadLatestSnapshot,
-        3000
-    );
-</script>
+            const computerNameElement =
+                document.getElementById("computerName");
+
+            const timestampElement =
+                document.getElementById("timestamp");
+
+            const cpuUsageElement =
+                document.getElementById("cpuUsage");
+
+            const ramUsageElement =
+                document.getElementById("ramUsage");
+
+            const diskUsageElement =
+                document.getElementById("diskUsage");
+
+            const ramDetailsElement =
+                document.getElementById("ramDetails");
+
+            const diskDetailsElement =
+                document.getElementById("diskDetails");
+
+            const cpuProgressElement =
+                document.getElementById("cpuProgress");
+
+            const ramProgressElement =
+                document.getElementById("ramProgress");
+
+            const diskProgressElement =
+                document.getElementById("diskProgress");
+
+            try {
+                const response = await fetch(
+                    "/api/v1/snapshots?limit=10",
+                    {
+                        cache: "no-store"
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        `Błąd HTTP: ${response.status}`
+                    );
+                }
+
+                const snapshots = await response.json();
+
+                if (snapshots.length === 0) {
+                    statusElement.textContent =
+                        "Brak pomiarów w bazie.";
+
+                    statusElement.className =
+                        "status-stale";
+
+                    return;
+                }
+
+                const snapshot = snapshots[0];
+                const newSnapshots = [];
+
+                for (const item of snapshots) {
+                    if (item.id > latestDisplayedId) {
+                        newSnapshots.push(item);
+                    }
+                }
+
+                newSnapshots.reverse();
+
+                for (const item of newSnapshots) {
+                    const row = document.createElement("tr");
+
+                    const timestampCell =
+                        document.createElement("td");
+
+                    const computerNameCell =
+                        document.createElement("td");
+
+                    const cpuCell =
+                        document.createElement("td");
+
+                    const ramCell =
+                        document.createElement("td");
+
+                    const diskCell =
+                        document.createElement("td");
+
+                    timestampCell.textContent =
+                        item.timestamp;
+
+                    computerNameCell.textContent =
+                        item.computer_name;
+
+                    cpuCell.textContent =
+                        `${Number(item.cpu_usage_percent).toFixed(2)}%`;
+
+                    ramCell.textContent =
+                        `${Number(item.memory_usage_percent).toFixed(2)}%`;
+
+                    diskCell.textContent =
+                        `${Number(item.disk_usage_percent).toFixed(2)}%`;
+
+                    row.appendChild(timestampCell);
+                    row.appendChild(computerNameCell);
+                    row.appendChild(cpuCell);
+                    row.appendChild(ramCell);
+                    row.appendChild(diskCell);
+
+                    historyBodyElement.prepend(row);
+                }
+
+                latestDisplayedId = snapshots[0].id;
+
+                while (historyBodyElement.children.length > 10) {
+                    historyBodyElement.lastElementChild.remove();
+                }
+
+                updateAgentStatus(
+                    statusElement,
+                    snapshot.timestamp
+                );
+
+                computerNameElement.textContent =
+                    snapshot.computer_name;
+
+                timestampElement.textContent =
+                    snapshot.timestamp;
+
+                const cpuUsage =
+                    Number(snapshot.cpu_usage_percent);
+
+                const ramUsage =
+                    Number(snapshot.memory_usage_percent);
+
+                const diskUsage =
+                    Number(snapshot.disk_usage_percent);
+
+                cpuUsageElement.textContent =
+                    `${cpuUsage.toFixed(2)}%`;
+
+                ramUsageElement.textContent =
+                    `${ramUsage.toFixed(2)}%`;
+
+                diskUsageElement.textContent =
+                    `${diskUsage.toFixed(2)}%`;
+
+                cpuProgressElement.value = cpuUsage;
+                ramProgressElement.value = ramUsage;
+                diskProgressElement.value = diskUsage;
+                const ramUsed =
+                    bytesToGibibytes(snapshot.memory_used_bytes);
+
+                const ramTotal =
+                    bytesToGibibytes(snapshot.memory_total_bytes);
+
+                const diskUsed =
+                    bytesToGibibytes(snapshot.disk_used_bytes);
+
+                const diskTotal =
+                    bytesToGibibytes(snapshot.disk_total_bytes);
+
+                ramDetailsElement.textContent =
+                    `${ramUsed.toFixed(2)} z ${ramTotal.toFixed(2)} GiB`;
+
+                diskDetailsElement.textContent =
+                    `${diskUsed.toFixed(2)} z ${diskTotal.toFixed(2)} GiB`;
+            }
+            catch (error) {
+                statusElement.textContent =
+                    `API niedostępne: ${error.message}`;
+
+                statusElement.className =
+                    "status-error";
+            }
+        }
+
+        loadLatestSnapshot();
+        setInterval(
+            loadLatestSnapshot,
+            1000
+        );
+    </script>
 </body>
+
 </html>
