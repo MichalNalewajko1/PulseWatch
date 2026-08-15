@@ -61,6 +61,8 @@
             value="0"
             max="100"
         ></progress>
+        <p id="ramDetails" class="metric-details">-</p>
+
     </article>
 
     <article class="metric-card disk-card">
@@ -73,14 +75,44 @@
             value="0"
             max="100"
         ></progress>
+        <p id="diskDetails" class="metric-details">-</p>
     </article>
-</div>
+        </div>
     </section>
+        <section class="history-panel">
+    <h2>Historia pomiarów</h2>
+
+    <div class="table-wrapper">
+        <table class="history-table">
+            <thead>
+                <tr>
+                    <th>Czas</th>
+                    <th>Komputer</th>
+                    <th>CPU</th>
+                    <th>RAM</th>
+                    <th>Dysk</th>
+                </tr>
+            </thead>
+
+            <tbody id="historyBody">
+            </tbody>
+        </table>
+    </div>
+    </section> 
 </main>
 
  <script>
+    function bytesToGibibytes(bytes)
+    {
+    const bytesPerGibibyte =
+        1024 * 1024 * 1024;
+
+    return Number(bytes) / bytesPerGibibyte;
+    }   
     async function loadLatestSnapshot()
     {
+        const historyBodyElement =
+            document.getElementById("historyBody");
         const statusElement =
             document.getElementById("status");
 
@@ -98,7 +130,13 @@
 
         const diskUsageElement =
             document.getElementById("diskUsage");
-        
+
+        const ramDetailsElement =
+            document.getElementById("ramDetails");
+
+        const diskDetailsElement =
+            document.getElementById("diskDetails");
+
         const cpuProgressElement =
             document.getElementById("cpuProgress");
 
@@ -111,7 +149,7 @@
         try
         {
             const response = await fetch(
-                "/api/v1/snapshots?limit=1",
+                "/api/v1/snapshots?limit=10",
                 {
                     cache: "no-store"
                 }
@@ -135,6 +173,50 @@
             }
 
             const snapshot = snapshots[0];
+                        historyBodyElement.replaceChildren();
+
+            for (const item of snapshots)
+            {
+                const row = document.createElement("tr");
+
+                const timestampCell =
+                    document.createElement("td");
+
+                const computerNameCell =
+                    document.createElement("td");
+
+                const cpuCell =
+                    document.createElement("td");
+
+                const ramCell =
+                    document.createElement("td");
+
+                const diskCell =
+                    document.createElement("td");
+
+                timestampCell.textContent =
+                    item.timestamp;
+
+                computerNameCell.textContent =
+                    item.computer_name;
+
+                cpuCell.textContent =
+                    `${Number(item.cpu_usage_percent).toFixed(2)}%`;
+
+                ramCell.textContent =
+                    `${Number(item.memory_usage_percent).toFixed(2)}%`;
+
+                diskCell.textContent =
+                    `${Number(item.disk_usage_percent).toFixed(2)}%`;
+
+                row.appendChild(timestampCell);
+                row.appendChild(computerNameCell);
+                row.appendChild(cpuCell);
+                row.appendChild(ramCell);
+                row.appendChild(diskCell);
+
+                historyBodyElement.appendChild(row);
+            }
 
             statusElement.textContent =
                 "Dane pobrane poprawnie.";
@@ -166,6 +248,23 @@
             cpuProgressElement.value = cpuUsage;
             ramProgressElement.value = ramUsage;
             diskProgressElement.value = diskUsage;
+            const ramUsed =
+                bytesToGibibytes(snapshot.memory_used_bytes);
+
+            const ramTotal =
+                bytesToGibibytes(snapshot.memory_total_bytes);
+
+            const diskUsed =
+                bytesToGibibytes(snapshot.disk_used_bytes);
+
+            const diskTotal =
+                bytesToGibibytes(snapshot.disk_total_bytes);
+
+            ramDetailsElement.textContent =
+                `${ramUsed.toFixed(2)} z ${ramTotal.toFixed(2)} GiB`;
+
+            diskDetailsElement.textContent =
+                `${diskUsed.toFixed(2)} z ${diskTotal.toFixed(2)} GiB`;
         }
         catch (error)
         {
