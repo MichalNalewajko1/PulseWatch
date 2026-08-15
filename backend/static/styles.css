@@ -82,6 +82,7 @@ body {
     padding: 24px;
     border-radius: 10px;
     color: white;
+    transition: box-shadow 0.25s ease;
 }
 
 .metric-card h3 {
@@ -157,6 +158,14 @@ body {
 
 .history-table tbody tr:hover {
     background-color: #f1f5f9;
+}
+
+.metric-card.metric-warning {
+    box-shadow: 0 0 0 4px #facc15;
+}
+
+.metric-card.metric-critical {
+    box-shadow: 0 0 0 4px #ef4444;
 }
 
 @media (max-width: 700px) {
