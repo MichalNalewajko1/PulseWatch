@@ -7,6 +7,7 @@
 
     <title>PulseWatch Dashboard</title>
     <link rel="stylesheet" href="/dashboard/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script src="/dashboard/dashboard.js" defer></script>
 
 </head>
@@ -61,6 +62,13 @@
                     <progress id="diskProgress" class="usage-progress" value="0" max="100"></progress>
                     <p id="diskDetails" class="metric-details">-</p>
                 </article>
+            </div>
+        </section>
+        <section class="chart-panel">
+            <h2>Historia wykorzystania CPU</h2>
+
+            <div class="chart-wrapper">
+                <canvas id="cpuHistoryChart"></canvas>
             </div>
         </section>
         <section class="history-panel">

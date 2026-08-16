@@ -73,6 +73,7 @@ function updateMetricState(
     }
 }
 let latestDisplayedId = 0;
+let cpuHistoryChart = null;
 async function loadLatestSnapshot() {
     const historyBodyElement =
         document.getElementById("historyBody");
@@ -143,6 +144,7 @@ async function loadLatestSnapshot() {
         }
 
         const snapshot = snapshots[0];
+        updateCpuHistoryChart(snapshots);
         const newSnapshots = [];
 
         for (const item of snapshots) {
@@ -221,11 +223,11 @@ async function loadLatestSnapshot() {
         const diskUsage =
             Number(snapshot.disk_usage_percent);
 
-        updateMetricState(cpuCardElement,cpuUsage,70,90);
+        updateMetricState(cpuCardElement, cpuUsage, 70, 90);
 
-        updateMetricState(ramCardElement,ramUsage,75,90);
+        updateMetricState(ramCardElement, ramUsage, 75, 90);
 
-        updateMetricState(diskCardElement,diskUsage,80,90);
+        updateMetricState(diskCardElement, diskUsage, 80, 90);
 
         cpuUsageElement.textContent =
             `${cpuUsage.toFixed(2)}%`;
@@ -271,3 +273,75 @@ setInterval(
     loadLatestSnapshot,
     1000
 );
+
+function updateCpuHistoryChart(snapshots) {
+    const chronologicalSnapshots =
+        [...snapshots].reverse();
+
+    const labels = [];
+    const cpuValues = [];
+
+    for (const item of chronologicalSnapshots) {
+        labels.push(
+            item.timestamp.slice(11)
+        );
+
+        cpuValues.push(
+            Number(item.cpu_usage_percent)
+        );
+    }
+
+    if (cpuHistoryChart === null) {
+        const canvasElement =
+            document.getElementById(
+                "cpuHistoryChart"
+            );
+
+        cpuHistoryChart = new Chart(
+            canvasElement,
+            {
+                type: "line",
+
+                data: {
+                    labels: labels,
+
+                    datasets: [
+                        {
+                            label: "CPU (%)",
+                            data: cpuValues,
+                            borderColor: "#2563eb",
+                            backgroundColor:
+                                "rgba(37, 99, 235, 0.15)",
+                            borderWidth: 2,
+                            tension: 0.25,
+                            fill: true
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 100
+                        }
+                    }
+                }
+            }
+        );
+
+        return;
+    }
+
+    cpuHistoryChart.data.labels =
+        labels;
+
+    cpuHistoryChart.data.datasets[0].data =
+        cpuValues;
+
+    cpuHistoryChart.update();
+}
