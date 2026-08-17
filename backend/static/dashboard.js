@@ -73,7 +73,7 @@ function updateMetricState(
     }
 }
 let latestDisplayedId = 0;
-let cpuHistoryChart = null;
+let usageHistoryChart = null;
 async function loadLatestSnapshot() {
     const historyBodyElement =
         document.getElementById("historyBody");
@@ -144,7 +144,7 @@ async function loadLatestSnapshot() {
         }
 
         const snapshot = snapshots[0];
-        updateCpuHistoryChart(snapshots);
+        updateUsageHistoryChart(snapshots);
         const newSnapshots = [];
 
         for (const item of snapshots) {
@@ -268,18 +268,14 @@ async function loadLatestSnapshot() {
     }
 }
 
-loadLatestSnapshot();
-setInterval(
-    loadLatestSnapshot,
-    1000
-);
-
-function updateCpuHistoryChart(snapshots) {
+function updateUsageHistoryChart(snapshots) {
     const chronologicalSnapshots =
         [...snapshots].reverse();
 
     const labels = [];
     const cpuValues = [];
+    const ramValues = [];
+    const diskValues = [];
 
     for (const item of chronologicalSnapshots) {
         labels.push(
@@ -289,15 +285,23 @@ function updateCpuHistoryChart(snapshots) {
         cpuValues.push(
             Number(item.cpu_usage_percent)
         );
+
+        ramValues.push(
+            Number(item.memory_usage_percent)
+        );
+
+        diskValues.push(
+            Number(item.disk_usage_percent)
+        );
     }
 
-    if (cpuHistoryChart === null) {
+    if (usageHistoryChart === null) {
         const canvasElement =
             document.getElementById(
-                "cpuHistoryChart"
+                "usageHistoryChart"
             );
 
-        cpuHistoryChart = new Chart(
+        usageHistoryChart = new Chart(
             canvasElement,
             {
                 type: "line",
@@ -310,11 +314,28 @@ function updateCpuHistoryChart(snapshots) {
                             label: "CPU (%)",
                             data: cpuValues,
                             borderColor: "#2563eb",
-                            backgroundColor:
-                                "rgba(37, 99, 235, 0.15)",
+                            backgroundColor: "#2563eb",
                             borderWidth: 2,
                             tension: 0.25,
-                            fill: true
+                            fill: false
+                        },
+                        {
+                            label: "RAM (%)",
+                            data: ramValues,
+                            borderColor: "#7c3aed",
+                            backgroundColor: "#7c3aed",
+                            borderWidth: 2,
+                            tension: 0.25,
+                            fill: false
+                        },
+                        {
+                            label: "Dysk (%)",
+                            data: diskValues,
+                            borderColor: "#0891b2",
+                            backgroundColor: "#0891b2",
+                            borderWidth: 2,
+                            tension: 0.25,
+                            fill: false
                         }
                     ]
                 },
@@ -337,11 +358,22 @@ function updateCpuHistoryChart(snapshots) {
         return;
     }
 
-    cpuHistoryChart.data.labels =
+    usageHistoryChart.data.labels =
         labels;
 
-    cpuHistoryChart.data.datasets[0].data =
+    usageHistoryChart.data.datasets[0].data =
         cpuValues;
 
-    cpuHistoryChart.update();
+    usageHistoryChart.data.datasets[1].data =
+        ramValues;
+
+    usageHistoryChart.data.datasets[2].data =
+        diskValues;
+
+    usageHistoryChart.update();
 }
+loadLatestSnapshot();
+setInterval(
+    loadLatestSnapshot,
+    1000
+);
