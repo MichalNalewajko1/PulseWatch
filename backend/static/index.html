@@ -8,7 +8,7 @@
     <title>PulseWatch Dashboard</title>
     <link rel="stylesheet" href="/dashboard/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-    <script src="/dashboard/dashboard.js" defer></script>
+    <script type="module" src="/dashboard/dashboard.js" defer></script>
 
 </head>
 
@@ -66,7 +66,19 @@
             </div>
         </section>
         <section class="chart-panel">
-            <h2>Historia wykorzystania zasobów</h2>
+            <div class="chart-header">
+                <h2>Historia wykorzystania zasobów</h2>
+
+                <label for="chartLimit">
+                    Liczba punktów:
+
+                    <select id="chartLimit">
+                        <option value="10">10</option>
+                        <option value="30">30</option>
+                        <option value="60">60</option>
+                    </select>
+                </label>
+            </div>
             <div class="chart-wrapper">
                 <canvas id="usageHistoryChart"></canvas>
             </div>

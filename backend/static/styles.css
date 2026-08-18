@@ -208,6 +208,27 @@ body {
     color: #92400e;
 }
 
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.chart-header label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-header select {
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background-color: white;
+}
+
 @media (max-width: 700px) {
     .metrics-grid {
         grid-template-columns: 1fr;
