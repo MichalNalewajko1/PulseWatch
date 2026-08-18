@@ -74,6 +74,7 @@ function updateMetricState(
 }
 let latestDisplayedId = 0;
 let usageHistoryChart = null;
+let refreshIntervalId = null;
 async function loadLatestSnapshot() {
     const historyBodyElement =
         document.getElementById("historyBody");
@@ -372,8 +373,51 @@ function updateUsageHistoryChart(snapshots) {
 
     usageHistoryChart.update();
 }
-loadLatestSnapshot();
-setInterval(
-    loadLatestSnapshot,
-    1000
+const refreshButton =
+    document.getElementById(
+        "refreshButton"
+    );
+
+function startDashboardRefresh() {
+    refreshButton.textContent =
+        "Wstrzymaj odświeżanie";
+
+    loadLatestSnapshot();
+
+    refreshIntervalId = setInterval(
+        loadLatestSnapshot,
+        1000
+    );
+}
+
+function stopDashboardRefresh() {
+    clearInterval(refreshIntervalId);
+
+    refreshIntervalId = null;
+
+    refreshButton.textContent =
+        "Wznów odświeżanie";
+
+    const statusElement =
+        document.getElementById("status");
+
+    statusElement.textContent =
+        "Odświeżanie dashboardu wstrzymane.";
+
+    statusElement.className =
+        "status-paused";
+}
+
+refreshButton.addEventListener(
+    "click",
+    function () {
+        if (refreshIntervalId === null) {
+            startDashboardRefresh();
+        }
+        else {
+            stopDashboardRefresh();
+        }
+    }
 );
+
+startDashboardRefresh();
