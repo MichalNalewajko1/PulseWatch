@@ -3,8 +3,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Query, status
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
-
+from pydantic import BaseModel, Field
 from database import get_latest_snapshots, initialize_database, save_snapshot
 
 STATIC_DIRECTORY = (
@@ -33,23 +32,23 @@ app.mount(
 )
 
 class MemoryMetrics(BaseModel):
-    total_bytes: int
-    available_bytes: int
-    used_bytes: int
-    usage_percent: float
+    total_bytes: int = Field(ge=0)
+    available_bytes: int = Field(ge=0)
+    used_bytes: int = Field(ge=0)
+    usage_percent: float = Field(ge=0, le=100)
 
 
 class DiskMetrics(BaseModel):
-    total_bytes: int
-    free_bytes: int
-    used_bytes: int
-    usage_percent: float
+    total_bytes: int = Field(ge=0)
+    free_bytes: int = Field(ge=0)
+    used_bytes: int = Field(ge=0)
+    usage_percent: float = Field(ge=0, le=100)
 
 
 class SystemSnapshotPayload(BaseModel):
-    timestamp: str
-    computer_name: str
-    cpu_usage_percent: float
+    timestamp: str = Field(min_length=1)
+    computer_name: str = Field(min_length=1, max_length=255)
+    cpu_usage_percent: float = Field(ge=0, le=100)
     memory: MemoryMetrics
     disk: DiskMetrics
 
