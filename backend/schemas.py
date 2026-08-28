@@ -40,6 +40,7 @@ class MemoryMetrics(BaseModel):
                 "available_bytes + used_bytes "
                 "musi być równe total_bytes"
             )
+            
 
         return self
 
