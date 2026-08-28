@@ -3,8 +3,9 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Query, status
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from database import get_latest_snapshots, initialize_database, save_snapshot
+from datetime import datetime
 
 STATIC_DIRECTORY = (
     Path(__file__).resolve().parent
@@ -81,6 +82,18 @@ class SystemSnapshotPayload(BaseModel):
     cpu_usage_percent: float = Field(ge=0, le=100)
     memory: MemoryMetrics
     disk: DiskMetrics
+    @field_validator("timestamp")
+    @classmethod
+    def validate_timestamp(
+        cls,
+        value: str
+    ) -> str:
+        try:
+            datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
+        except ValueError as error:
+            raise ValueError("timestamp musi mieć format " "YYYY-MM-DD HH:MM:SS") from error
+
+        return value
 
 
 @app.get("/health")
