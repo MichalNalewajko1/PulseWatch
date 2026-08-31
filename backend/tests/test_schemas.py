@@ -50,3 +50,35 @@ def test_invalid_timestamp_is_rejected():
         SystemSnapshotPayload(
             **payload
         )
+
+def test_cpu_above_100_is_rejected():
+    payload = build_valid_payload()
+
+    payload["cpu_usage_percent"] = 150.0
+
+    with pytest.raises(ValidationError):
+        SystemSnapshotPayload(
+            **payload
+        )
+
+
+def test_inconsistent_memory_bytes_are_rejected():
+    payload = build_valid_payload()
+
+    payload["memory"]["used_bytes"] = 700
+
+    with pytest.raises(ValidationError):
+        SystemSnapshotPayload(
+            **payload
+        )
+
+
+def test_inconsistent_disk_bytes_are_rejected():
+    payload = build_valid_payload()
+
+    payload["disk"]["used_bytes"] = 1600
+
+    with pytest.raises(ValidationError):
+        SystemSnapshotPayload(
+            **payload
+        )
