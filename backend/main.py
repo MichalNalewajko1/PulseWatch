@@ -5,10 +5,7 @@ from fastapi.staticfiles import StaticFiles
 from database import get_latest_snapshots, initialize_database, save_snapshot
 from schemas import (SnapshotCreatedResponse, SystemSnapshotPayload, SnapshotResponse)
 
-STATIC_DIRECTORY = (
-    Path(__file__).resolve().parent
-    / "static"
-)
+STATIC_DIRECTORY = (Path(__file__).resolve().parent / "static")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,17 +13,11 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(
-    title="PulseWatch API",
-    lifespan=lifespan
-)
+app = FastAPI(title="PulseWatch API", lifespan=lifespan)
 
 app.mount(
     "/dashboard",
-    StaticFiles(
-        directory=STATIC_DIRECTORY,
-        html=True
-    ),
+    StaticFiles(directory=STATIC_DIRECTORY, html=True),
     name="dashboard"
 )
 

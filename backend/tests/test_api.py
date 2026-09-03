@@ -50,18 +50,15 @@ def test_post_snapshot_returns_created(monkeypatch):
         "timestamp": "2026-09-01 12:00:00"
     }
 
-def test_post_invalid_snapshot_returns_422(
-    monkeypatch
-):
+def test_post_invalid_snapshot_returns_422(monkeypatch):
     monkeypatch.setattr(
         main,
         "initialize_database",
         lambda: None
     )
 
-    def fail_if_save_is_called(
-        _snapshot_data
-    ):
+
+    def fail_if_save_is_called( _snapshot_data):
         raise AssertionError(
             "save_snapshot nie powinno zostać wywołane"
         )
@@ -124,9 +121,7 @@ def test_get_snapshots_returns_data(
         }
     ]
 
-    def fake_get_latest_snapshots(
-        limit
-    ):
+    def fake_get_latest_snapshots(limit):
         assert limit == 1
         return expected_snapshots
 
