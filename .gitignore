@@ -83,8 +83,10 @@ CMakeLists.txt.user*
 /build*/
 /.qtcreator/
 
+# Python environment and cache
 /backend/.venv/
-/.qtcreator/
 __pycache__/
-*.pyc
+.pytest_cache/
+
+# Local SQLite database
 /backend/pulsewatch.db*
