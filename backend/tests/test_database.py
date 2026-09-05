@@ -95,3 +95,73 @@ def test_save_snapshot_stores_data_and_returns_id(monkeypatch, tmp_path):
         600,
         1500
     )
+
+def test_get_latest_snapshots_returns_newest_first(
+    monkeypatch,
+    tmp_path
+):
+    test_database_path = (
+        tmp_path
+        / "test_pulsewatch.db"
+    )
+
+    monkeypatch.setattr(
+        database,
+        "DATABASE_PATH",
+        test_database_path
+    )
+
+    database.initialize_database()
+
+    first_snapshot = build_valid_snapshot()
+    first_snapshot["computer_name"] = "PC-1"
+
+    second_snapshot = build_valid_snapshot()
+    second_snapshot["computer_name"] = "PC-2"
+
+    third_snapshot = build_valid_snapshot()
+    third_snapshot["computer_name"] = "PC-3"
+
+    first_id = database.save_snapshot(
+        first_snapshot
+    )
+
+    second_id = database.save_snapshot(
+        second_snapshot
+    )
+
+    third_id = database.save_snapshot(
+        third_snapshot
+    )
+
+    snapshots = database.get_latest_snapshots(
+        limit=2
+    )
+
+    assert len(snapshots) == 2
+
+    assert [
+        snapshot["id"]
+        for snapshot in snapshots
+    ] == [
+        third_id,
+        second_id
+    ]
+
+    assert [
+        snapshot["computer_name"]
+        for snapshot in snapshots
+    ] == [
+        "PC-3",
+        "PC-2"
+    ]
+
+    assert first_id not in [
+        snapshot["id"]
+        for snapshot in snapshots
+    ]
+
+    assert all(
+        isinstance(snapshot, dict)
+        for snapshot in snapshots
+    )

@@ -90,3 +90,6 @@ __pycache__/
 
 # Local SQLite database
 /backend/pulsewatch.db*
+
+# Runtime CSV log
+/pulsewatch_metrics.csv
