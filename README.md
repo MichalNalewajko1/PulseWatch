@@ -8,7 +8,8 @@ A native C++ agent collects CPU, memory and disk usage metrics and sends them as
 
 - Windows system metrics collected by a native C++ agent
 - CPU, RAM and disk usage monitoring
-- JSON serialization and HTTP communication through WinHTTP- REST API built with FastAPI
+- JSON serialization and HTTP communication through WinHTTP
+- REST API built with FastAPI
 - Input and output validation with Pydantic
 - Persistent storage in SQLite
 - Automatically refreshed browser dashboard
@@ -19,20 +20,11 @@ A native C++ agent collects CPU, memory and disk usage metrics and sends them as
 
 ## Architecture
 
-```text
-C++ monitoring agent
-        |
-        | POST /api/v1/snapshots
-        v
-FastAPI + Pydantic
-        |
-        v
-SQLite database
-        ^
-        |
-        | GET /api/v1/snapshots
-        |
-Browser dashboard
+```mermaid
+flowchart LR
+    Agent["C++ monitoring agent"] -->|"POST snapshot"| API["FastAPI + Pydantic"]
+    Dashboard["Browser dashboard"] <-->|"GET snapshots / JSON"| API
+    API <--> DB[(SQLite database)]
 ```
 
 ## Technologies
@@ -155,7 +147,7 @@ Run the complete test suite:
 
 The tests use temporary SQLite databases and do not modify the local `pulsewatch.db` file.
 
-## API endpoints
+## Available routes
 
 | Method | Endpoint | Description |
 |---|---|---|
