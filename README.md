@@ -63,7 +63,7 @@ flowchart LR
 - CMake 3.16 or newer
 - A compiler supporting C++20
 - Git
-- Python 3
+- Python 3.11 or newer
 - A modern web browser
 - An internet connection during the first CMake configuration
 
